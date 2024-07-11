@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"regexp"
+	"strings"
 
 	// Uncomment this block to pass the first stage
 	"net"
@@ -28,14 +28,13 @@ func main() {
 	}
 	req := make([]byte, 1024)
 	conn.Read(req)
-	re := regexp.MustCompile(`/echo/([^ ]+)`)
-
-	// Find the substring that matches the pattern
-	match := re.FindStringSubmatch(string(req))
-	requestStr := match[1]
-	println(string(len(requestStr)))
-	// if !strings.HasPrefix(string(req), "GET /echo/ HTTP/1.1") {
-	// 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-	// }
-	conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\n\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s ", len(requestStr), requestStr)))
+	path := strings.Split(string(req), "")[1]
+	if path == "/" {
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else if strings.Split(path, "/")[1] == "echo" {
+		message := strings.Split(path, "/")[2]
+		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+	} else {
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	}
 }
