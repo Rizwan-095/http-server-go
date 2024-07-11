@@ -33,8 +33,9 @@ func main() {
 	// Find the substring that matches the pattern
 	match := re.FindStringSubmatch(string(req))
 	requestStr := match[1]
+	println(string(len(requestStr)))
 	// if !strings.HasPrefix(string(req), "GET /echo/ HTTP/1.1") {
 	// 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	// }
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nContent-Type: text/plain\r\nContent-Length: " + string(len(requestStr)) + "\r\n\r\n" + requestStr))
+	conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\n\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s ", len(requestStr), requestStr)))
 }
