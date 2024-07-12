@@ -51,12 +51,12 @@ func handleConnection(conn net.Conn) {
 		isGzip := false
 		for _, header := range headers {
 			if strings.HasPrefix(header, "Accept-Encoding") {
-				encodingType = strings.Split(strings.Split(header, ": ")[1], ",")
+				encodingType = strings.Split(strings.Split(header, ": ")[1], ", ")
 			}
 		}
 		contentEncoding := ""
-		fmt.Println(encodingType)
 		for _, value := range encodingType {
+			fmt.Println(encodingType, value, isGzip)
 			if value == "gzip" {
 				isGzip = true
 				contentEncoding = value
