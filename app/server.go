@@ -2,24 +2,21 @@ package main
 
 import (
 	"fmt"
-	"strings"
-
-	// Uncomment this block to pass the first stage
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
-	// Uncomment this block to pass the first stage
-
+	//Server is now listening on tcp port 4221.
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
+	//Server accepting concurrent http requests.
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -29,26 +26,41 @@ func main() {
 		go handleConnection(conn)
 	}
 }
+
+// Function to handle requests.
 func handleConnection(conn net.Conn) {
 	req := make([]byte, 1024)
 	_, err := conn.Read(req)
 	if err != nil {
 		fmt.Println("Error reading request: ", err.Error())
-		os.Exit(1)
+		return
 	}
 	request := string(req)
 	path := strings.Split(string(req), " ")[1]
+	headers := strings.Split(request, "\r\n")[1:]
 	absPath := strings.Split(path, "/")[1]
 	switch {
+	//Server responding to http request with status code (200 Ok).
 	case path == "/":
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 		return
+	//Server can extract URL path of request.
 	case absPath == "echo":
 		message := strings.Split(path, "/")[2]
-		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
-		return
+		encodingType := ""
+		for _, header := range headers {
+			if strings.HasPrefix(header, "Accept-Encoding") {
+				encodingType = strings.Split(header, ": ")[1]
+			}
+		}
+		if len(encodingType) < 1 {
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+			return
+		} else {
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", len(message), encodingType, message)))
+		}
+	//Server Reading headers.
 	case absPath == "user-agent":
-		headers := strings.Split(request, "\r\n")[1:]
 		userAgent := ""
 		for _, header := range headers {
 			if strings.HasPrefix(header, "User-Agent") {
@@ -57,6 +69,7 @@ func handleConnection(conn net.Conn) {
 		}
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(userAgent), userAgent)))
 		return
+	//Server returing file content for Http GET and creating new file with content from request body for Http POST request respectively.
 	case absPath == "files":
 		dir := os.Args[2]
 		fileName := strings.Split(path, "/")[2]
@@ -76,6 +89,7 @@ func handleConnection(conn net.Conn) {
 			}
 			conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 		}
+	//Server responding with status code (404 Not Found) if request is wrong
 	default:
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		return
