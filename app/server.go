@@ -56,7 +56,7 @@ func handleConnection(conn net.Conn) {
 		if len(encodingType) < 1 {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 			return
-		} else {
+		} else if encodingType == "gzip" {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encodingType, len(message), message)))
 		}
 	//Server Reading headers.
