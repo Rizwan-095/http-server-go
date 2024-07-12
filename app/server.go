@@ -68,7 +68,7 @@ func handleConnection(conn net.Conn) {
 			return
 		} else {
 			fileContent := strings.SplitN(request, "\r\n\r\n", 2)[1]
-			err := os.WriteFile(dir+fileName, []byte(fileContent), os.ModeAppend.Perm())
+			err := os.WriteFile(dir+fileName, []byte(fileContent), os.ModePerm.Perm())
 			if err != nil {
 				fmt.Println("Error reading request: ", err.Error())
 				return
