@@ -69,12 +69,11 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 			return
 		} else if isGzip {
-			c, err := compressString(message)
-			compressedMessage := string(c)
+			compressedMessage, err := compressString(message)
 			if err != nil {
 				fmt.Println("Error compressing string:", err.Error())
 			}
-			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", contentEncoding, len(compressedMessage), message)))
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", contentEncoding, len(compressedMessage), string(compressedMessage))))
 			return
 		} else {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
