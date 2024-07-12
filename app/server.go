@@ -27,13 +27,24 @@ func main() {
 		os.Exit(1)
 	}
 	req := make([]byte, 1024)
-	conn.Read(req)
+	_, err = conn.Read(req)
+	if err != nil {
+		fmt.Println("Error reading request: ", err.Error())
+		os.Exit(1)
+	}
+
 	path := strings.Split(string(req), " ")[1]
+	headers := strings.Split(string(req), " ")[2]
 	if path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if strings.Split(path, "/")[1] == "echo" {
 		message := strings.Split(path, "/")[2]
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+	} else if strings.Split(path, "/")[1] == "user-agent" {
+		if strings.HasPrefix(string(headers[1]), "User-Agent:") {
+			headerValue := strings.TrimRight(string(headers[1]), " ")
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(headerValue), headerValue)))
+		}
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
