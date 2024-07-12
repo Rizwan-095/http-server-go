@@ -58,6 +58,10 @@ func handleConnection(conn net.Conn) {
 			return
 		} else if encodingType == "gzip" {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encodingType, len(message), message)))
+			return
+		} else {
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+			return
 		}
 	//Server Reading headers.
 	case absPath == "user-agent":
