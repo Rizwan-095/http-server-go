@@ -67,8 +67,8 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(fileContent), fileContent)))
 			return
 		} else {
-			fileContent := strings.SplitN(request, "\r\n\r\n", 2)[1]
-			err := os.WriteFile(dir+fileName, []byte(fileContent), os.ModePerm)
+			fileContent := []byte(strings.Trim(strings.SplitN(request, "\r\n\r\n", 2)[1], "\x00"))
+			err := os.WriteFile(dir+fileName, fileContent, os.ModePerm)
 			if err != nil {
 				fmt.Println("Error reading request: ", err.Error())
 				return
