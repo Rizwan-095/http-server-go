@@ -54,9 +54,13 @@ func handleConnection(conn net.Conn) {
 				encodingType = strings.Split(strings.Split(header, ": ")[1], ",")
 			}
 		}
+		contentEncoding := ""
+		fmt.Println(encodingType)
+
 		for _, value := range encodingType {
 			if value == "gzip" {
 				isGzip = true
+				contentEncoding = value
 				break
 			}
 		}
