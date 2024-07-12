@@ -34,7 +34,8 @@ func main() {
 	}
 
 	path := strings.Split(string(req), " ")[1]
-	headers := strings.Split(string(req), "\r\n")[2]
+	headers := strings.Split(string(req), "\r\n")
+	fmt.Println(headers)
 	if path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if strings.Split(path, "/")[1] == "echo" {
