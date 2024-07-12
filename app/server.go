@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net"
 	"os"
@@ -113,4 +115,16 @@ func handleConnection(conn net.Conn) {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		return
 	}
+}
+func compressString(data string) ([]byte, error) {
+	var buf bytes.Buffer
+	gzipWriter := gzip.NewWriter(&buf)
+	_, err := gzipWriter.Write([]byte(data))
+	if err != nil {
+		return nil, err
+	}
+	if err := gzipWriter.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
