@@ -56,7 +56,6 @@ func handleConnection(conn net.Conn) {
 		}
 		contentEncoding := ""
 		fmt.Println(encodingType)
-
 		for _, value := range encodingType {
 			if value == "gzip" {
 				isGzip = true
@@ -68,7 +67,7 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 			return
 		} else if isGzip {
-			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encodingType, len(message), message)))
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", contentEncoding, len(message), message)))
 			return
 		} else {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
