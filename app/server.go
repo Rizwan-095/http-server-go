@@ -47,16 +47,23 @@ func handleConnection(conn net.Conn) {
 	//Server can extract URL path of request.
 	case absPath == "echo":
 		message := strings.Split(path, "/")[2]
-		encodingType := ""
+		encodingType := []string{}
+		isGzip := false
 		for _, header := range headers {
 			if strings.HasPrefix(header, "Accept-Encoding") {
-				encodingType = strings.Split(header, ": ")[1]
+				encodingType = strings.Split(strings.Split(header, ": ")[1], ",")
+			}
+		}
+		for _, value := range encodingType {
+			if value == "gzip" {
+				isGzip = true
+				break
 			}
 		}
 		if len(encodingType) < 1 {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 			return
-		} else if encodingType == "gzip" {
+		} else if isGzip {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encodingType, len(message), message)))
 			return
 		} else {
