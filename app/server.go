@@ -38,15 +38,16 @@ func handleConnection(conn net.Conn) {
 	}
 	request := string(req)
 	path := strings.Split(string(req), " ")[1]
+	absPath := strings.Split(path, "/")[1]
 	switch {
 	case path == "/":
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 		return
-	case strings.Split(path, "/")[1] == "echo":
+	case absPath == "echo":
 		message := strings.Split(path, "/")[2]
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 		return
-	case strings.Split(path, "/")[1] == "user-agent":
+	case absPath == "user-agent":
 		headers := strings.Split(request, "\r\n")[1:]
 		userAgent := ""
 		for _, header := range headers {
@@ -56,7 +57,7 @@ func handleConnection(conn net.Conn) {
 		}
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(userAgent), userAgent)))
 		return
-	case strings.Split(path, "/")[1] == "files":
+	case absPath == "files":
 		dir := os.Args[2]
 		fileName := strings.Split(path, "/")[2]
 		if strings.Split(string(req), " ")[0] == "GET" {
