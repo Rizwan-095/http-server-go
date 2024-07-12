@@ -59,13 +59,22 @@ func handleConnection(conn net.Conn) {
 	case strings.Split(path, "/")[1] == "files":
 		dir := os.Args[2]
 		fileName := strings.Split(path, "/")[2]
-		fileContent, err := os.ReadFile(dir + fileName)
-		if err != nil {
-			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		if strings.Split(string(req), " ")[0] == "GET" {
+			fileContent, err := os.ReadFile(dir + fileName)
+			if err != nil {
+				conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			}
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(fileContent), fileContent)))
+			return
+		} else {
+			fileContent := strings.SplitN(request, "\r\n\r\n", 2)[1]
+			err := os.WriteFile(dir+fileName, []byte(fileContent), os.ModeAppend.Perm())
+			if err != nil {
+				fmt.Println("Error reading request: ", err.Error())
+				return
+			}
+			conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 		}
-
-		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(fileContent), fileContent)))
-		return
 	default:
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		return
