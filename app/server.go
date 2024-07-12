@@ -32,7 +32,7 @@ func main() {
 }
 func handleConnection(conn net.Conn) {
 	req := make([]byte, 1024)
-	_, err = conn.Read(req)
+	_, err := conn.Read(req)
 	if err != nil {
 		fmt.Println("Error reading request: ", err.Error())
 		os.Exit(1)
