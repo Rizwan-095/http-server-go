@@ -43,7 +43,7 @@ func main() {
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 	} else if strings.Split(path, "/")[1] == "user-agent" {
 		if strings.HasPrefix(string(headers[1]), "User-Agent:") {
-			headerValue := strings.TrimRight(string(headers[1]), " ")
+			headerValue := strings.TrimRight(string(headers[3]), " ")
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(headerValue), headerValue)))
 		}
 	} else {
