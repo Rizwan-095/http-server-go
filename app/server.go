@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"strings"
 
 	// Uncomment this block to pass the first stage
@@ -57,12 +59,22 @@ func handleConnection(conn net.Conn) {
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(userAgent), userAgent)))
 		return
 	case strings.Split(path, "/")[1] == "files":
+		buf := bytes.NewBuffer(nil)
 		fileName := strings.Split(path, "/")[2]
-		fileContent, err := os.ReadFile(fileName)
+		f, err := os.Open(fileName)
 		if err != nil {
 			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		}
-		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(fileContent), string(fileContent))))
+		fileInfo, err := f.Stat()
+		if err != nil {
+			fmt.Println("Error getting file info:", err)
+			return
+		}
+		io.Copy(buf, f)
+		f.Close()
+		fileContent := buf.String()
+		fmt.Println(fileContent)
+		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", fileInfo.Size(), fileContent)))
 		return
 	default:
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
